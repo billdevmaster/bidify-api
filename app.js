@@ -7,7 +7,6 @@ require('dotenv').config();
 
 var app = express();
 
-var PORT = 8080;
 var HOST_NAME = process.env.DB_URL;
 // var DATABASE_NAME = 'Bidify';
 
@@ -25,6 +24,6 @@ app.use(function(req, res, next) {
 });
 app.use('/api', auctionRouter);
 
-app.listen(PORT, function () {
-  console.log('Listening on port ' + PORT);
+app.listen(process.env.PORT, function () {
+  console.log('Listening on port ' + process.env.PORT);
 });
