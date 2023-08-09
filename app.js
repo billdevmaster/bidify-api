@@ -3,11 +3,12 @@ var mongoose = require('mongoose')
 var bodyParser = require('body-parser')
 // var itemRouter = require('./routers/item');
 var auctionRouter = require('./routers/auction')
+require('dotenv').config();
 
 var app = express();
 
 var PORT = 8080;
-var HOST_NAME = 'mongodb+srv://bidify:Bidify1!@cluster0.ksdef.mongodb.net/Bidify?retryWrites=true&w=majority';
+var HOST_NAME = process.env.DB_URL;
 // var DATABASE_NAME = 'Bidify';
 
 mongoose.connect(HOST_NAME).catch(error => console.error("error", error.message));
