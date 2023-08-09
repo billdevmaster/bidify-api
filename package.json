@@ -1,6 +1,9 @@
 {
   "name": "restful-api-express-mongoose",
   "version": "1.0.0",
+  "engines": {
+    "node": "14.x"
+  },
   "description": "Example of a RESTful API built with Node.js, Express.js and Mongoose.",
   "main": "app.js",
   "scripts": {
