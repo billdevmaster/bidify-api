@@ -218,7 +218,6 @@ auctionRouter
     .route('/fetchWalletNfts')
     .get(async function (req, res) {
         const { chainId, address, cursor } = req.query;
-        console.log(address);
         const nfts = [];
         
         let chain = {};
@@ -237,36 +236,33 @@ auctionRouter
             chain,
             cursor
         });
+
         for (let i = 0; i < response.jsonResponse.result.length; i++) {
             // if (response.jsonResponse.result[i].possible_spam == false) {
             const data = response.jsonResponse.result[i];
-            let { name, image, description } = "";
+            let { image, description } = "";
             if (!data.metadata) {
                 try {
                     const metadata = await axios.get(data.token_uri);
                     // get metadata from token_uri
-                    name = metadata.data.name;
                     image = metadata.data.image;
                     description = metadata.data.description;
                 } catch (e) {
-                    continue;
+                    // ignore
+                    image = "";
+                    description = "";
                 }
             } else {
                 const metadata = JSON.parse(data.metadata);
-                name = metadata.name;
                 image = metadata.image;
                 description = metadata.description;
             }
-            console.log(data.metadata);
-            console.log(image, data.token_uri);
-            if (!image) {
-                continue;
-            }
+
             if (image && image.includes('ipfs://')) image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
             nfts.push({
-                name,
-                description,
-                image,
+                name: data.name,
+                description: description ? description : "",
+                image: image ? image : "",
                 platform: data.token_address,
                 token: data.token_id,
                 amount: data.amount,
