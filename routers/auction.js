@@ -1,6 +1,9 @@
 var express = require('express');
+const Moralis = require("moralis").default;
+const { EvmChain } = require("@moralisweb3/common-evm-utils");
 var Auction = require('../models/auction');
-var Collection = require('../models/collection')
+var Collection = require('../models/collection');
+const { default: axios } = require('axios');
 
 var auctionRouter = express.Router();
 auctionRouter
@@ -209,6 +212,72 @@ auctionRouter
 
             response.json(nfts[0]);
         });
+    })
+
+auctionRouter
+    .route('/fetchWalletNfts')
+    .get(async function (req, res) {
+        const { chainId, address, cursor } = req.query;
+        console.log(address);
+        const nfts = [];
+        
+        let chain = {};
+        if (chainId == 137) {
+            chain = EvmChain.POLYGON;
+        } else if (chainId == 56) {
+            chain = EvmChain.BSC;
+        } else if (chainId == 43114) {
+            chain = EvmChain.AVALANCHE;
+        } else if (chainId == 42161) {
+            chain = EvmChain.ARBITRUM;
+        }
+        
+        let response = await Moralis.EvmApi.nft.getWalletNFTs({
+            address,
+            chain,
+            cursor
+        });
+        for (let i = 0; i < response.jsonResponse.result.length; i++) {
+            // if (response.jsonResponse.result[i].possible_spam == false) {
+            const data = response.jsonResponse.result[i];
+            let { name, image, description } = "";
+            if (!data.metadata) {
+                try {
+                    const metadata = await axios.get(data.token_uri);
+                    // get metadata from token_uri
+                    name = metadata.data.name;
+                    image = metadata.data.image;
+                    description = metadata.data.description;
+                } catch (e) {
+                    continue;
+                }
+            } else {
+                const metadata = JSON.parse(data.metadata);
+                name = metadata.name;
+                image = metadata.image;
+                description = metadata.description;
+            }
+            console.log(data.metadata);
+            console.log(image, data.token_uri);
+            if (!image) {
+                continue;
+            }
+            if (image && image.includes('ipfs://')) image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+            nfts.push({
+                name,
+                description,
+                image,
+                platform: data.token_address,
+                token: data.token_id,
+                amount: data.amount,
+                token_uri: data.token_uri,
+                isERC721: data.contract_type == "ERC721" ? true : false,
+            });
+            // }
+        }
+        console.log(nfts.length)
+
+        return res.json({nfts: nfts, cursor: response.jsonResponse.cursor});
     })
 
 module.exports = auctionRouter;

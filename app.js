@@ -1,8 +1,9 @@
 var express = require('express')
 var mongoose = require('mongoose')
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var Moralis = require('moralis').default;
 // var itemRouter = require('./routers/item');
-var auctionRouter = require('./routers/auction')
+var auctionRouter = require('./routers/auction');
 require('dotenv').config();
 
 var app = express();
@@ -22,7 +23,13 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
   next();
 });
+
 app.use('/api', auctionRouter);
+
+Moralis.start({
+  apiKey: process.env.MORALIS_API_KEY,
+  // ...and any other configuration
+});
 
 app.listen(process.env.PORT, function () {
   console.log('Listening on port ' + process.env.PORT);
