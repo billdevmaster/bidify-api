@@ -195,23 +195,71 @@ auctionRouter
     });
 auctionRouter
     .route('/collection/:platform/:id')
-    .get(function (request, response) {
+    .get(async function (request, response) {
         const { platform, id } = request.params
         const { chainId, owner } = request.query
 
         console.log('GET /collection/:platform/:id', platform, id, chainId, owner);
-
-        Collection.find({ network: chainId, owner: owner, platform: {'$regex': `^${platform}$`, $options: 'i'}, token: id }, function (error, nfts) {
-
-            if (error) {
-                response.status(500).send(error);
-                return;
+        if (chainId == 137 || chainId == 56 || chainId == 43114 || chainId == 42161) {
+            let chain = {};
+            if (chainId == 137) {
+                chain = EvmChain.POLYGON;
+            } else if (chainId == 56) {
+                chain = EvmChain.BSC;
+            } else if (chainId == 43114) {
+                chain = EvmChain.AVALANCHE;
+            } else if (chainId == 42161) {
+                chain = EvmChain.ARBITRUM;
+            }
+            const res = await Moralis.EvmApi.nft.getNFTMetadata({
+                address: platform,
+                chain,
+                tokenId: id,
+            });
+            const data = res.jsonResponse;
+            let { image, description } = "";
+            if (!data.metadata) {
+                try {
+                    const metadata = await axios.get(data.token_uri);
+                    // get metadata from token_uri
+                    image = metadata.data.image;
+                    description = metadata.data.description;
+                } catch (e) {
+                    // ignore
+                    image = "";
+                    description = "";
+                }
+            } else {
+                const metadata = JSON.parse(data.metadata);
+                image = metadata.image;
+                description = metadata.description;
             }
 
-            // console.log(auctions);
-
-            response.json(nfts[0]);
-        });
+            if (image && image.includes('ipfs://')) image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+            const retData = {
+                name: data.name,
+                description: description ? description : "",
+                image: image ? image : "",
+                platform: data.token_address,
+                token: data.token_id,
+                amount: data.amount,
+                token_uri: data.token_uri,
+                isERC721: data.contract_type == "ERC721" ? true : false,
+            };
+            return response.json(retData)
+        } else {
+            Collection.find({ network: chainId, owner: owner, platform: {'$regex': `^${platform}$`, $options: 'i'}, token: id }, function (error, nfts) {
+    
+                if (error) {
+                    response.status(500).send(error);
+                    return;
+                }
+    
+                // console.log(auctions);
+    
+                response.json(nfts[0]);
+            });
+        }
     })
 
 auctionRouter
