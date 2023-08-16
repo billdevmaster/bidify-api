@@ -4,6 +4,7 @@ const { EvmChain } = require("@moralisweb3/common-evm-utils");
 var Auction = require('../models/auction');
 var Collection = require('../models/collection');
 const { default: axios } = require('axios');
+const { getERC721Uri } = require('../utils/nft');
 
 var auctionRouter = express.Router();
 auctionRouter
@@ -284,19 +285,31 @@ auctionRouter
             chain,
             cursor
         });
-
+        
         for (let i = 0; i < response.jsonResponse.result.length; i++) {
             // if (response.jsonResponse.result[i].possible_spam == false) {
             const data = response.jsonResponse.result[i];
             let { image, description } = "";
             if (!data.metadata) {
                 try {
-                    const metadata = await axios.get(data.token_uri);
+                    let url = "";
+                    if (data.token_uri) {
+                        url = data.token_uri;
+                    } else {
+                        if (data.contract_type == "ERC721") {
+                            url = await getERC721Uri(data.token_address, data.token_id, chainId);
+                            if (url && url.includes('ipfs://')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                            if (url && url.includes('{id}')) url = url.replace('{id}', data.token_id);
+                        }
+                    }
+                    
+                    const metadata = await axios.get(url);
                     // get metadata from token_uri
                     image = metadata.data.image;
                     description = metadata.data.description;
                 } catch (e) {
                     // ignore
+                    // console.log(e)
                     image = "";
                     description = "";
                 }

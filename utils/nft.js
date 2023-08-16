@@ -1,5 +1,5 @@
 const Web3 = require("web3");
-const { getLogUrl, URLS } = require("./config");
+const { getLogUrl, URLS, ERC721 } = require("./config");
 
 const getNFTs = async (owner, chainId) => {
   // console.log(chainId)
@@ -104,6 +104,15 @@ const getNFTs = async (owner, chainId) => {
   return res;
 }
 
+const getERC721Uri = async (contractAddress, token, chainId) => {
+  const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
+  const tokenUri = await new web3.eth.Contract(ERC721.abi, contractAddress).methods
+  .tokenURI(token)
+    .call();
+  return tokenUri;
+}
+
 module.exports = {
-  getNFTs
+  getNFTs,
+  getERC721Uri
 }
