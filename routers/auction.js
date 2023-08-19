@@ -221,7 +221,17 @@ auctionRouter
             let { image, description } = "";
             if (!data.metadata) {
                 try {
-                    const metadata = await axios.get(data.token_uri);
+                    let url = "";
+                    if (data.token_uri) {
+                        url = data.token_uri;
+                    } else {
+                        if (data.contract_type == "ERC721") {
+                            url = await getERC721Uri(data.token_address, data.token_id, chainId);
+                            if (url && url.includes('ipfs://')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                            if (url && url.includes('{id}')) url = url.replace('{id}', data.token_id);
+                        }
+                    }
+                    const metadata = await axios.get(url);
                     // get metadata from token_uri
                     image = metadata.data.image;
                     description = metadata.data.description;
