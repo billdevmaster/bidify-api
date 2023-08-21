@@ -200,7 +200,7 @@ auctionRouter
         const { chainId, owner } = request.query
 
         console.log('GET /collection/:platform/:id', platform, id, chainId, owner);
-        if (chainId == 137 || chainId == 56 || chainId == 43114 || chainId == 42161) {
+        if (chainId == 137 || chainId == 5 || chainId == 56 || chainId == 43114 || chainId == 42161) {
             let chain = {};
             if (chainId == 137) {
                 chain = EvmChain.POLYGON;
@@ -262,7 +262,6 @@ auctionRouter
             return response.json(retData)
         } else {
             Collection.find({ network: chainId, owner: owner, platform: {'$regex': `^${platform}$`, $options: 'i'}, token: id }, function (error, nfts) {
-    
                 if (error) {
                     response.status(500).send(error);
                     return;
