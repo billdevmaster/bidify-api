@@ -106,6 +106,7 @@ const getNFTs = async (owner, chainId) => {
 
 const getERC721Uri = async (contractAddress, token, chainId) => {
   const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
+  console.log(contractAddress, token)
   const tokenUri = await new web3.eth.Contract(ERC721.abi, contractAddress).methods
   .tokenURI(token)
     .call();

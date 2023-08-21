@@ -1,6 +1,6 @@
 const NetworkId = {
   ETHEREUM: 1,
-  RINKEBY: 4,
+  GOERLI: 5,
   MATIC: 137,
   EGEM: 1987,
   AVAX: 43114,
@@ -21,7 +21,7 @@ const URLS = {
   // 80001: "https://matic-testnet-archive-rpc.bwarelabs.com",
   // 43113: "https://api.avax-test.network/ext/bc/C/rpc",
   // 5: "https://goerli.infura.io/v3/0c8149f8e63b4b818d441dd7f74ab618",
-  [NetworkId.RINKEBY]: "https://rinkeby.infura.io/v3/0c8149f8e63b4b818d441dd7f74ab618",
+  [NetworkId.GOERLI]: "https://goerli.infura.io/v3/0c8149f8e63b4b818d441dd7f74ab618",
   [NetworkId.EGEM]: "https://lb.rpc.egem.io",
   [NetworkId.AVAX]: "https://api.avax.network/ext/bc/C/rpc",
   [NetworkId.MATIC]: "https://polygon-rpc.com",
@@ -33,7 +33,6 @@ const URLS = {
   [NetworkId.OPTIMISM]: "",
   [NetworkId.ARBITRUM]: "",
   [NetworkId.zkSyncTestnet]: "https://testnet.era.zksync.dev",
-  [NetworkId.zkSyncMainnet]: "https://mainnet.era.zksync.io",
 };
 
 const getLogUrl = {

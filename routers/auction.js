@@ -39,7 +39,6 @@ auctionRouter
         console.log('GET /auctions');
 
         Auction.find({ network: request.query.chainId, paidOut: false }, function (error, auctions) {
-
             if (error) {
                 response.status(500).send(error);
                 return;
@@ -211,12 +210,15 @@ auctionRouter
                 chain = EvmChain.AVALANCHE;
             } else if (chainId == 42161) {
                 chain = EvmChain.ARBITRUM;
+            } else if (chainId == 5) {
+                chain = EvmChain.GOERLI;
             }
             const res = await Moralis.EvmApi.nft.getNFTMetadata({
                 address: platform,
                 chain,
                 tokenId: id,
             });
+            console.log(res)
             const data = res.jsonResponse;
             let { image, description } = "";
             if (!data.metadata) {
@@ -288,6 +290,8 @@ auctionRouter
             chain = EvmChain.AVALANCHE;
         } else if (chainId == 42161) {
             chain = EvmChain.ARBITRUM;
+        } else if (chainId == 5) {
+            chain = EvmChain.GOERLI;
         }
         
         let response = await Moralis.EvmApi.nft.getWalletNFTs({
@@ -295,7 +299,6 @@ auctionRouter
             chain,
             cursor
         });
-        
         for (let i = 0; i < response.jsonResponse.result.length; i++) {
             // if (response.jsonResponse.result[i].possible_spam == false) {
             const data = response.jsonResponse.result[i];
@@ -308,7 +311,7 @@ auctionRouter
                     } else {
                         if (data.contract_type == "ERC721") {
                             url = await getERC721Uri(data.token_address, data.token_id, chainId);
-                            if (url && url.includes('ipfs://')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                            if (url && url.includes('ipfs://') && !url.includes('https://ipfs.io/ipfs/')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
                             if (url && url.includes('{id}')) url = url.replace('{id}', data.token_id);
                         }
                     }
