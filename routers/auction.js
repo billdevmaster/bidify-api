@@ -30,7 +30,17 @@ auctionRouter
         var auction = new Auction(request.body);
 
         await auction.save();
-        await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
+        if (request.body.isERC721) {
+            await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
+        } else {
+            const collection = await Collection.findOne({ owner: request.body.owner, token: request.body.token, network: request.body.network, platform: { '$regex': `^${request.body.platform}$`, $options: 'i' } })
+            if (collection.amount > 1) {
+                collection.amount -= 1;
+                await collection.save();
+            } else {
+                await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
+            }
+        }
         console.info("saved auction and deleted collection")
         response.status(201).send(auction);
     })
@@ -200,7 +210,7 @@ auctionRouter
         const { chainId, owner } = request.query
 
         console.log('GET /collection/:platform/:id', platform, id, chainId, owner);
-        if (chainId == 137 || chainId == 5 || chainId == 56 || chainId == 43114 || chainId == 42161) {
+        if (chainId == 137 || chainId == 56 || chainId == 43114 || chainId == 42161) {
             let chain = {};
             if (chainId == 137) {
                 chain = EvmChain.POLYGON;
@@ -268,8 +278,22 @@ auctionRouter
                 }
     
                 // console.log(auctions);
-    
-                response.json(nfts[0]);
+                if (nfts.length == 0) {
+                    Auction.findOne({ network: chainId, platform: {'$regex': `^${platform}$`, $options: 'i'}, token: id }, function (error, auction) {
+
+                        if (error) {
+                            response.status(500).send(error);
+                            return;
+                        }
+            
+                        // console.log(auction);
+            
+                        response.json(auction);
+            
+                    });
+                } else {
+                    response.json(nfts[0]);
+                }
             });
         }
     })
@@ -301,7 +325,8 @@ auctionRouter
         for (let i = 0; i < response.jsonResponse.result.length; i++) {
             // if (response.jsonResponse.result[i].possible_spam == false) {
             const data = response.jsonResponse.result[i];
-            let { image, description } = "";
+            let { image, description, name } = "";
+            name = data.name;
             if (!data.metadata) {
                 try {
                     let url = "";
@@ -319,6 +344,7 @@ auctionRouter
                     // get metadata from token_uri
                     image = metadata.data.image;
                     description = metadata.data.description;
+                    name = metadata.data.name;
                 } catch (e) {
                     // ignore
                     // console.log(e)
@@ -329,11 +355,12 @@ auctionRouter
                 const metadata = JSON.parse(data.metadata);
                 image = metadata.image;
                 description = metadata.description;
+                name = metadata.name;
             }
 
             if (image && image.includes('ipfs://')) image = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
             nfts.push({
-                name: data.name,
+                name: name,
                 description: description ? description : "",
                 image: image ? image : "",
                 platform: data.token_address,

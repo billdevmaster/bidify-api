@@ -10,7 +10,8 @@ var collectionSchema = new Schema({
   owner: String,
   platform: String,
   token: String,
-  network: Number
+  network: Number,
+  amount: Number
 }, { collection: 'Collections' });
 
 module.exports = mongoose.model('Collection', collectionSchema);
