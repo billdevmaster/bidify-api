@@ -34,11 +34,13 @@ auctionRouter
             await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
         } else {
             const collection = await Collection.findOne({ owner: request.body.owner, token: request.body.token, network: request.body.network, platform: { '$regex': `^${request.body.platform}$`, $options: 'i' } })
-            if (collection.amount > 1) {
-                collection.amount -= 1;
-                await collection.save();
-            } else {
-                await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
+            if (collection) {
+                if (collection.amount > 1) {
+                    collection.amount -= 1;
+                    await collection.save();
+                } else {
+                    await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
+                }
             }
         }
         console.info("saved auction and deleted collection")
