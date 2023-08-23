@@ -22,7 +22,7 @@ const URLS = {
   [NetworkId.MATIC]: "https://polygon-rpc.com",
   [NetworkId.XDAI]: "https://rpc.gnosischain.com",
   [NetworkId.ETC]: "https://etc.etcdesktop.com",
-  [NetworkId.EVMOS]: "https://eth.bd.evmos.org:8545",
+  [NetworkId.EVMOS]: "https://evmos-mainnet.public.blastapi.io",
   [NetworkId.MOVR]: "https://rpc.api.moonriver.moonbeam.network",
   [NetworkId.BNB]: "https://bsc-dataseed1.binance.org",
   [NetworkId.OPTIMISM]: "",
@@ -36,7 +36,7 @@ const getLogUrl = {
   [NetworkId.BNB]: "https://api.bscscan.com/api?module=logs&action=getLogs",
   [NetworkId.MOVR]: "https://api-moonriver.moonscan.io/api?module=logs&action=getLogs",
   [NetworkId.EVMOS]: "https://evm.evmos.org/api?module=logs&action=getLogs",
-  [NetworkId.XDAI]: "https://blockscout.com/xdai/mainnet/api?module=logs&action=getLogs",
+  [NetworkId.XDAI]: "https://gnosis.blockscout.com/api?module=logs&action=getLogs",
   [NetworkId.zkSyncTestnet]: "https://zksync2-testnet.zkscan.io/api?module=logs&action=getLogs",
   [NetworkId.zkSyncTestnet]: "https://zksync2-mainnet.zkscan.io/api?module=logs&action=getLogs",
   [NetworkId.GOERLI]: "https://api-goerli.etherscan.io/api?module=logs&action=getLogs",
@@ -1424,7 +1424,7 @@ const Apis = {
   [NetworkId.BNB]: "QC4UPPIN4JPDA4YAY1PAS46RGNJUYFHKCM",
   [NetworkId.MOVR]: "GCYJCX8CRQQQ21H94QT4YR8TGRHRZIBDIG",
   [NetworkId.GOERLI]: "QNH5TIIYA5GXN2TT326FFBMSSY3H5B24XX",
-  [NetworkId.EVMOS]: ""
+  [NetworkId.EVMOS]: "cqt_rQgX9mJXYvvHVPCk9YdmFhkJWRdr"
 }
 
 module.exports = {
