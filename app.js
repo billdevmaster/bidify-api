@@ -130,10 +130,15 @@ const checkAuctions = async () => {
           // check highbidder and paidout
           if (pendingAuctionIdList.includes(i.toString())) {
             const auction = await Auction.findOne({ network: data.network, id: data.id });
-            if (auction.paidOut != data.paidOut || auction.highBidder != data.highBidder || auction.referrer != data.referrer) {
+            if (auction.paidOut != data.paidOut || auction.highBidder != data.highBidder || auction.referrer != data.referrer || auction.currentBid != data.currentBid) {
               auction.paidOut = data.paidOut;
               auction.highBidder = data.highBidder;
               auction.referrer = data.referrer;
+              auction.currentBid = data.currentBid;
+              auction.nextBid = data.nextBid;
+              auction.highBidder = data.highBidder;
+              auction.endingPrice = data.endingPrice;
+              auction.currency = data.currency;
               await auction.save();
               console.log("update save", chainId, i)
             }

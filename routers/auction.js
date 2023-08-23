@@ -47,10 +47,9 @@ auctionRouter
         console.info("saved auction and deleted collection")
         response.status(201).send(auction);
     })
-    .get(function (request, response) {
+    .get(async function (request, response) {
 
         console.log('GET /auctions');
-
         Auction.find({ network: request.query.chainId, paidOut: false }, function (error, auctions) {
             if (error) {
                 response.status(500).send(error);
