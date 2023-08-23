@@ -9,7 +9,7 @@ require('dotenv').config();
 const Web3 = require("web3");
 const { URLS, BIDIFY, Apis, getLogUrl } = require("./utils/config");
 const Auction = require("./models/auction");
-const { getNftDetail } = require('./utils/nft');
+const { getNftDetail, atomic, unatomic } = require('./utils/nft');
 
 var app = express();
 
@@ -44,7 +44,7 @@ const checkAuctions = async () => {
   while (process.env.LOOP == "true") {
     for (const property in URLS) {
       const chainId = property;
-      // if (chainId != 100 && chainId != 9001) {
+      // if (chainId != 43114) {
       //   continue;
       // }
       
@@ -93,17 +93,26 @@ const checkAuctions = async () => {
           const list = await Bidify.methods.getListing(i).call();
           // save new record.
           const data = { network: chainId, id: i.toString() };
-          data.creator = list[0];
-          data.currency = list[1];
-          data.platform = list[2];
-          data.token = list[3];
-          data.price = list[4];
-          data.endingPrice = list[5];
-          data.referrer = list[6];
-          data.highBidder = list[8];
-          data.endTime = list[9];
-          data.paidOut = list[10];
-          data.isERC721 = list[11];
+          
+          data.creator = list.creator;
+          data.currency = list.currency == "0x0000000000000000000000000000000000000000" ? null : list.currency;
+          data.platform = list.platform;
+          data.token = list.token;
+          data.currentBid = list.price;
+          data.endingPrice = list.endingPrice;
+          data.referrer = list.referrer == "0x0000000000000000000000000000000000000000" ? null : list.referrer;
+          data.highBidder = list.highBidder == "0x0000000000000000000000000000000000000000" ? null : list.highBidder;
+          data.endTime = list.endTime;
+          data.paidOut = list.paidOut;
+          data.isERC721 = list.isERC721;
+          data.nextBid = await Bidify.methods.getNextBid(i).call();
+          if (data.currentBid === data.nextBid) {
+            data.currentBid = null;
+          } else {
+            data.currentBid = unatomic(data.currentBid.toString(), 18);
+          }
+          data.nextBid = unatomic(data.nextBid.toString(), 18);
+          data.endingPrice = unatomic(data.endingPrice.toString(), 18);
           
           if (totalAuctionCount != logs.length) {
             const metadata = await getNftDetail(data.platform, data.token, chainId, data.isERC721)

@@ -197,9 +197,52 @@ const getNftDetail = async (platform, token, chainId, isERC721) => {
   }
 };
 
+const atomic = (value, decimals) => {
+  let quantity = decimals;
+  if (value.indexOf(".") !== -1) {
+    quantity -= value.length - value.indexOf(".") - 1;
+  }
+  let atomicized = value.replace(".", "");
+  for (let i = 0; i < quantity; i++) {
+    atomicized += "0";
+  }
+  while (atomicized[0] === "0") {
+    atomicized = atomicized.substr(1);
+  }
+  return Web3.utils.toBN(atomicized);
+}
+
+// Convert to a human readable value
+const unatomic = (value, decimals) => {
+  value = value.padStart(decimals + 1, "0");
+  let temp =
+    value.substr(0, value.length - decimals) +
+    "." +
+    value.substr(value.length - decimals);
+  while (temp[0] === "0") {
+    temp = temp.substr(1);
+  }
+  while (temp.endsWith("0")) {
+    temp = temp.slice(0, -1);
+  }
+  if (temp.endsWith(".")) {
+    temp = temp.slice(0, -1);
+  }
+  if (temp.startsWith(".")) {
+    temp = "0" + temp;
+  }
+
+  if (temp == "") {
+    return "0";
+  }
+  return temp;
+}
+
 module.exports = {
   getNFTs,
   getERC721Uri,
   getNftDetail,
-  getERC1155Uri
+  getERC1155Uri,
+  atomic,
+  unatomic
 }
