@@ -1,5 +1,8 @@
+const Moralis = require("moralis").default;
+const { EvmChain } = require("@moralisweb3/common-evm-utils");
 const Web3 = require("web3");
-const { getLogUrl, URLS, ERC721 } = require("./config");
+const axios = require("axios");
+const { getLogUrl, URLS, ERC721, ERC1155 } = require("./config");
 
 const getNFTs = async (owner, chainId) => {
   // console.log(chainId)
@@ -106,14 +109,97 @@ const getNFTs = async (owner, chainId) => {
 
 const getERC721Uri = async (contractAddress, token, chainId) => {
   const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
-  console.log(contractAddress, token)
   const tokenUri = await new web3.eth.Contract(ERC721.abi, contractAddress).methods
   .tokenURI(token)
     .call();
   return tokenUri;
 }
 
+const getERC1155Uri = async (contractAddress, token, chainId) => {
+  const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
+  const tokenUri = await new web3.eth.Contract(ERC1155.abi, contractAddress).methods
+  .uri(token)
+    .call();
+  return tokenUri;
+}
+
+const getNftDetail = async (platform, token, chainId, isERC721) => {
+  if (chainId == 137 || chainId == 56 || chainId == 43114 || chainId == 42161) {
+    let chain = {};
+    if (chainId == 137) {
+      chain = EvmChain.POLYGON;
+    } else if (chainId == 56) {
+      chain = EvmChain.BSC;
+    } else if (chainId == 43114) {
+      chain = EvmChain.AVALANCHE;
+    } else if (chainId == 42161) {
+      chain = EvmChain.ARBITRUM;
+    } else if (chainId == 5) {
+      chain = EvmChain.GOERLI;
+    }
+    const res = await Moralis.EvmApi.nft.getNFTMetadata({
+      address: platform,
+      chain,
+      tokenId: token,
+    });
+    const data = res.jsonResponse;
+    let { image, description, name, metadataUrl } = "";
+    if (!data.metadata) {
+      try {
+        let url = "";
+        if (data.token_uri) {
+            url = data.token_uri;
+        } else {
+            if (data.contract_type == "ERC721") {
+                url = await getERC721Uri(data.token_address, data.token_id, chainId);
+                if (url && url.includes('ipfs://')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                if (url && url.includes('{id}')) url = url.replace('{id}', data.token_id);
+            }
+        }
+        const metadata = await axios.get(url);
+        // get metadata from token_uri
+        image = metadata.data.image;
+        description = metadata.data.description;
+        name = metadata.data.name;
+        metadataUrl = url;
+      } catch (e) {
+          // ignore
+        image = "";
+        description = "";
+      }
+    } else {
+      const metadata = JSON.parse(data.metadata);
+      image = metadata.image;
+      name = metadata.name;
+      description = metadata.description;
+      metadataUrl = data.token_uri
+    }
+    return { name, image, description, metadataUrl };
+  } else {
+    const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
+    let url = "";
+    if (isERC721) {
+      url = await getERC721Uri(platform, token, chainId);
+    } else {
+      url = await getERC1155Uri(platform, token, chainId);
+    }
+    
+    if (url && url.includes('ipfs://')) url = url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    if (url && url.includes('{id}')) url = url.replace('{id}', data.token_id);
+    try {
+      const metadata = await axios.get(url);
+
+      const { name, image, description } = metadata.data;
+      return { name, image, description, url };
+    } catch (e) {
+      return { name: "", image: "", description: "", metadataUrl: url };
+    }
+  }
+};
+
 module.exports = {
   getNFTs,
-  getERC721Uri
+  getERC721Uri,
+  getNftDetail,
+  getERC1155Uri
 }

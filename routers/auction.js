@@ -26,10 +26,11 @@ auctionRouter
     .post(async (request, response) => {
 
         console.log('POST /auctions');
-
-        var auction = new Auction(request.body);
-
-        await auction.save();
+        const oldAuction = await Auction.findOne({ network: request.body.network, id: request.body.id });
+        if (!oldAuction) {
+            var auction = new Auction(request.body);
+            await auction.save();
+        }
         if (request.body.isERC721) {
             await Collection.deleteOne({ token: request.body.token, network: request.body.network, platform: {'$regex': `^${request.body.platform}$`, $options: 'i'}})
         } else {
