@@ -111,7 +111,7 @@ const checkAuctions = async () => {
             if (!databaselist) {
               const newData = new Auction(data);
               await newData.save();
-              console.log(chainId, i)
+              console.log("new data save", chainId, i)
             }
           }
           // check highbidder and paidout
@@ -121,7 +121,7 @@ const checkAuctions = async () => {
               auction.paidOut = data.paidOut;
               auction.highBidder = data.highBidder;
               await auction.save();
-              console.log(chainId, i)
+              console.log("update save", chainId, i)
             }
           }
 
