@@ -120,6 +120,8 @@ const checkAuctions = async () => {
             if (auction.paidOut != data.paidOut || auction.highBidder != data.highBidder || auction.referrer != data.referrer || auction.price != data.price) {
               auction.paidOut = data.paidOut;
               auction.highBidder = data.highBidder;
+              auction.referrer = data.referrer;
+              auction.price = data.price;
               await auction.save();
               console.log("update save", chainId, i)
             }
