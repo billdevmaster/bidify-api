@@ -59,7 +59,7 @@ const checkAuctions = async () => {
         "0x5424fbee1c8f403254bd729bf71af07aa944120992dfa4f67cd0e7846ef7b8de";
       let logs = [];
       try {
-        if (chainId == 43114 || chainId == 137 || chainId == 5 || chainId == 56 || chainId == 1285 || chainId == 100) {
+        if (chainId == 43114 || chainId == 137 || chainId == 5 || chainId == 56 || chainId == 1285 || chainId == 100 || chainId == 9001) {
           let url = `${getLogUrl[chainId]}&fromBlock=0&${chainId == 9001 || chainId == 100 || chainId == 61 ? 'toBlock=latest&' : ''}address=${BIDIFY.address[chainId]}&topic0=${topic0}`;
           if (chainId != 9001 && chainId != 100) {
             url += `&apikey=${Apis[chainId]}`;
@@ -74,6 +74,7 @@ const checkAuctions = async () => {
             topics: [topic0],
           });
         }
+        console.log("success", chainId, logs.length);
         const totalAuctionCount = await Auction.count({ network: chainId });
         const pendingAuctionIdList = [];
         if (totalAuctionCount == logs.length) {

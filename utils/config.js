@@ -35,7 +35,7 @@ const getLogUrl = {
   [NetworkId.AVAX]: "https://api.snowtrace.io/api?module=logs&action=getLogs",
   [NetworkId.BNB]: "https://api.bscscan.com/api?module=logs&action=getLogs",
   [NetworkId.MOVR]: "https://api-moonriver.moonscan.io/api?module=logs&action=getLogs",
-  [NetworkId.EVMOS]: "https://evm.evmos.org/api?module=logs&action=getLogs",
+  [NetworkId.EVMOS]: "https://blockscout.evmos.org/api?module=logs&action=getLogs",
   [NetworkId.XDAI]: "https://gnosis.blockscout.com/api?module=logs&action=getLogs",
   [NetworkId.zkSyncTestnet]: "https://zksync2-testnet.zkscan.io/api?module=logs&action=getLogs",
   [NetworkId.zkSyncTestnet]: "https://zksync2-mainnet.zkscan.io/api?module=logs&action=getLogs",
