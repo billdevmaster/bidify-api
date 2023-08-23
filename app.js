@@ -50,7 +50,6 @@ const checkAuctions = async () => {
         continue;
       }
       const web3 = new Web3(new Web3.providers.HttpProvider(URLS[chainId]));
-      const lastBlock = await web3.eth.getBlock('latest');
       
       const Bidify = new web3.eth.Contract(BIDIFY.abi, BIDIFY.address[chainId]);
       const topic0 =
@@ -72,7 +71,6 @@ const checkAuctions = async () => {
           });
         }
         
-        console.log(`success: ${chainId}: `, logs.length);
         const totalAuctionCount = await Auction.count({ network: chainId });
         const pendingAuctionIdList = [];
         if (totalAuctionCount == logs.length) {
@@ -82,7 +80,6 @@ const checkAuctions = async () => {
             pendingAuctionIdList.push(pendingAuctions[i].id);
           }
         }
-        console.log(pendingAuctionIdList)
         for (let i = 0; i < logs.length; i++) {
           if (totalAuctionCount == logs.length) {
             if (!pendingAuctionIdList.includes(i.toString())) {
@@ -103,9 +100,7 @@ const checkAuctions = async () => {
           data.endTime = list[9];
           data.paidOut = list[10];
           data.isERC721 = list[11];
-          if (chainId == 5 && data.id == "1") {
-            console.log(data)
-          }
+          
           if (totalAuctionCount != logs.length) {
             const metadata = await getNftDetail(data.platform, data.token, chainId, data.isERC721)
             data.name = metadata.name;
