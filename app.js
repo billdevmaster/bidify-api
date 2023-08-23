@@ -74,20 +74,18 @@ const checkAuctions = async () => {
         
         console.log(`success: ${chainId}: `, logs.length);
         const totalAuctionCount = await Auction.count({ network: chainId });
-        let firstpendingAuction = "";
+        const pendingAuctionIdList = [];
         if (totalAuctionCount == logs.length) {
           // getting the last ones.
-          const pendingAuctions = await Auction.findOne({ network: chainId, endTime: { $gte: lastBlock.timestamp } }).sort({ "id": 1 });
-          if (pendingAuctions) {
-            firstpendingAuction = pendingAuctions.id
+          const pendingAuctions = await Auction.find({ network: chainId, paidOut: false });
+          for (let i = 0; i < pendingAuctions.length; i++) {
+            pendingAuctionIdList.push(pendingAuctions[i].id);
           }
         }
+        console.log(pendingAuctionIdList)
         for (let i = 0; i < logs.length; i++) {
           if (totalAuctionCount == logs.length) {
-            if (firstpendingAuction == "") {
-              continue;
-            }
-            if (i < firstpendingAuction * 1) {
+            if (!pendingAuctionIdList.includes(i.toString())) {
               continue;
             }
           }
@@ -105,6 +103,9 @@ const checkAuctions = async () => {
           data.endTime = list[9];
           data.paidOut = list[10];
           data.isERC721 = list[11];
+          if (chainId == 5 && data.id == "1") {
+            console.log(data)
+          }
           if (totalAuctionCount != logs.length) {
             const metadata = await getNftDetail(data.platform, data.token, chainId, data.isERC721)
             data.name = metadata.name;
@@ -119,7 +120,7 @@ const checkAuctions = async () => {
             }
           }
           // check highbidder and paidout
-          if (data.endTime >= lastBlock.timestamp) {
+          if (pendingAuctionIdList.includes(i.toString())) {
             const auction = await Auction.findOne({ network: data.network, id: data.id });
             if (auction.paidOut != data.paidOut || auction.highBidder != data.highBidder || auction.referrer != data.referrer || auction.price != data.price) {
               auction.paidOut = data.paidOut;
@@ -136,9 +137,8 @@ const checkAuctions = async () => {
       }
   
       
-      // }
+      }
     }
-  }
 }
 
 checkAuctions();
