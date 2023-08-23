@@ -41,7 +41,7 @@ app.listen(process.env.PORT, function () {
 });
 
 const checkAuctions = async () => {
-  while (process.env.Loop == "true") {
+  while (process.env.LOOP == "true") {
     for (const property in URLS) {
       const chainId = property;
       
