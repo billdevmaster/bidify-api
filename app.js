@@ -74,6 +74,9 @@ const checkAuctions = async () => {
             topics: [topic0],
           });
         }
+        if (chainId == 100) {
+          console.log("success", chainId, logs.length);
+        }
         const totalAuctionCount = await Auction.count({ network: chainId });
         const pendingAuctionIdList = [];
         if (totalAuctionCount == logs.length) {
