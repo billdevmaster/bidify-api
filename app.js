@@ -44,7 +44,7 @@ const checkAuctions = async () => {
   while (process.env.LOOP == "true") {
     for (const property in URLS) {
       const chainId = property;
-      // if (chainId != 43114) {
+      // if (chainId != 100) {
       //   continue;
       // }
       
@@ -64,6 +64,7 @@ const checkAuctions = async () => {
           if (chainId != 9001 && chainId != 100) {
             url += `&apikey=${Apis[chainId]}`;
           }
+          console.log(url)
           const ret = await axios.get(url);
           logs = ret.data.result
         } else {
